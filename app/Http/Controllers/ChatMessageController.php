@@ -44,8 +44,38 @@ class ChatMessageController extends Controller
         $chatMessage->load('user');
 
         /// TODO send broadcast event to pusher and send notification to onesignal services
-        // $this->sendNotificationToOther($chatMessage);
+        $this->sendNotificationToOther($chatMessage);
 
         return $this->success($chatMessage, 'Message has been sent successfully.');
+    }
+
+    private function sendNotificationToOther(ChatMessage $chatMessage): void
+    {
+
+        $chatId = $chatMessage->chat_id;
+
+        // TODO move this event broadcast to observer
+        broadcast(new NewMessageSent($chatMessage))->toOthers();
+
+        // $user = auth()->user();
+        // $userId = $user->id;
+
+        // $chat = Chat::where('id', $chatMessage->chat_id)
+        //     ->with(['participants' => function ($query) use ($userId) {
+        //         $query->where('user_id', '!=', $userId);
+        //     }])
+        //     ->first();
+        // if (count($chat->participants) > 0) {
+        //     $otherUserId = $chat->participants[0]->user_id;
+
+        //     $otherUser = User::where('id', $otherUserId)->first();
+        //     $otherUser->sendNewMessageNotification([
+        //         'messageData' => [
+        //             'senderName' => $user->username,
+        //             'message' => $chatMessage->message,
+        //             'chatId' => $chatMessage->chat_id
+        //         ]
+        //     ]);
+        // }
     }
 }
