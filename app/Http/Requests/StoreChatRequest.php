@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetChatRequest extends FormRequest
+class StoreChatRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +24,11 @@ class GetChatRequest extends FormRequest
      */
     public function rules()
     {
+        $userModel = get_class(new User());
         return [
-            'is_private' => 'nullable|boolean'
+            'user_id' => "required|exists:{$userModel},id",
+            'name' => 'nullable',
+            'is_private' => 'nullable|boolean',
         ];
     }
 }
