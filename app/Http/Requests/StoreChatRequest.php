@@ -25,6 +25,7 @@ class StoreChatRequest extends FormRequest
     public function rules()
     {
         $userModel = get_class(new User());
+
         return [
             'user_id' => "required|exists:{$userModel},id",
             'name' => 'nullable',

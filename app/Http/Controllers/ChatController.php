@@ -33,23 +33,24 @@ class ChatController extends Controller
             ->get();
         return $this->success($chats);
     }
-
     /**
      * Stores a new chat
      *
      * @param StoreChatRequest $request
      * @return JsonResponse
      */
+
     public function store(StoreChatRequest $request): JsonResponse
     {
         $data = $this->prepareStoreData($request);
         if ($data['userId'] === $data['otherUserId']) {
-            return $this->error('You cannot create a chat with your own');
+            return $this->error('You can not create a chat with your own');
         }
 
         $previousChat = $this->getPreviousChat($data['otherUserId']);
 
         if ($previousChat === null) {
+
             $chat = Chat::create($data['data']);
             $chat->participants()->createMany([
                 [
@@ -60,14 +61,19 @@ class ChatController extends Controller
                 ]
             ]);
 
-            $chat->refresh()->load('lastMessage.user', 'participant.user');
-
+            $chat->refresh()->load('lastMessage.user', 'participants.user');
             return $this->success($chat);
         }
 
-        return $this->success($previousChat->load('lastMessage.user', 'participant.user'));
+        return $this->success($previousChat->load('lastMessage.user', 'participants.user'));
     }
 
+    /**
+     * Check if user and other user has previous chat or not
+     *
+     * @param int $otherUserId
+     * @return mixed
+     */
     private function getPreviousChat(int $otherUserId): mixed
     {
 
@@ -84,19 +90,26 @@ class ChatController extends Controller
     }
 
 
+    /**
+     * Prepares data for store a chat
+     *
+     * @param StoreChatRequest $request
+     * @return array
+     */
     private function prepareStoreData(StoreChatRequest $request): array
     {
         $data = $request->validated();
         $otherUserId = (int)$data['user_id'];
         unset($data['user_id']);
-        $data['created_at'] = auth()->user()->id;
+        $data['created_by'] = auth()->user()->id;
 
         return [
             'otherUserId' => $otherUserId,
             'userId' => auth()->user()->id,
-            'data' => $data
+            'data' => $data,
         ];
     }
+
 
     /**
      * Gets a single chat

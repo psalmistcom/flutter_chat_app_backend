@@ -16,17 +16,15 @@ class User extends Authenticatable
     protected $table = 'users';
     protected $guarded = ['id'];
 
-    
+
     protected $hidden = [
         'password'
     ];
 
     const USER_TOKEN = "userToken";
-    
+
     public function chats(): HasMany
     {
         return $this->hasMany(Chat::class, 'created_by');
     }
-
-    
 }
